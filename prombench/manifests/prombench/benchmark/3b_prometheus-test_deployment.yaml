@@ -149,7 +149,7 @@ spec:
         runAsUser: 0
       containers:
       - name: prometheus
-        image: quay.io/prometheus/prometheus:{{ .RELEASE }}
+        image: gke.gcr.io/prometheus-engine/prometheus:v2.35.0-gmp.6-gke.0
         imagePullPolicy: Always
         command: [ "/bin/prometheus" ]
         args: [

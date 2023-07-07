@@ -206,8 +206,7 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  externalTrafficPolicy: Local
-  type: "{{ .NGINX_SERVICE_TYPE }}"
+  type: "NodePort"
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx

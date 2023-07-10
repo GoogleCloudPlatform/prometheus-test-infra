@@ -1,6 +1,10 @@
-INFRA_CMD        ?= ../infra/infra
+INFRA_CMD        			?= ../infra/infra
 
-PROVIDER 		 ?= gke
+PROVIDER 		 			?= gke
+
+PROMETHEUS_IMAGE_REPOSITORY ?= gke.gcr.io/prometheus-engine/prometheus
+
+PROMETHEUS_IMAGE_VERSION 	?= v2.35.0-gmp.7-gke.0
 
 .PHONY: deploy clean
 deploy: node_create resource_apply
@@ -27,6 +31,8 @@ cluster_resource_apply:
 		-v OAUTH_TOKEN="$(printf ${OAUTH_TOKEN} | base64 -w 0)" \
 		-v WH_SECRET="$(printf ${WH_SECRET} | base64 -w 0)" \
 		-v GITHUB_ORG:${GITHUB_ORG} -v GITHUB_REPO:${GITHUB_REPO} \
+		-v PROMETHEUS_IMAGE_REPOSITORY:${PROMETHEUS_IMAGE_REPOSITORY} \
+		-v PROMETHEUS_IMAGE_VERSION:${PROMETHEUS_IMAGE_VERSION} \
 		-f manifests/cluster-infra
 
 cluster_delete:
@@ -51,6 +57,8 @@ resource_apply:
 		-v CLUSTER_NAME:${CLUSTER_NAME} \
 		-v PR_NUMBER:${PR_NUMBER} -v RELEASE:${RELEASE} -v DOMAIN_NAME:${DOMAIN_NAME} \
 		-v GITHUB_ORG:${GITHUB_ORG} -v GITHUB_REPO:${GITHUB_REPO} \
+		-v PROMETHEUS_IMAGE_REPOSITORY:${PROMETHEUS_IMAGE_REPOSITORY} \
+		-v PROMETHEUS_IMAGE_VERSION:${PROMETHEUS_IMAGE_VERSION} \
 		-f manifests/prombench/benchmark
 
 # Required because namespace and cluster-role are not part of the created nodes

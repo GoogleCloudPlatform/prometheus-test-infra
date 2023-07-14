@@ -41,6 +41,7 @@ jobs:
 
       - name: Build and publish the container image
         run: |
-          IMAGE_NAME_AND_TAG=$(echo "${IMAGE_REGISTRY}/${GITHUB_ORG}/${GITHUB_REPO}/prombench:latest" | tr '[:upper:]' '[:lower:]')
-          docker build prombench/ --tag ${IMAGE_NAME_AND_TAG}
-          docker push ${IMAGE_NAME_AND_TAG}
+          # Converting all uppercase letters to lowercase (as GHCR does not allow uppercase in the name of the image)
+          IMAGE_ID=$(echo "${IMAGE_REGISTRY}/${GITHUB_ORG}/${GITHUB_REPO}/prombench:latest" | tr '[:upper:]' '[:lower:]')
+          docker build prombench/ --tag ${IMAGE_ID}
+          docker push ${IMAGE_ID}

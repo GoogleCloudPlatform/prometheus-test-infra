@@ -196,6 +196,11 @@ spec:
       labels:
         app: prometheus-meta
         prometheus: meta
+        app.kubernetes.io/prometheus: meta
+        app.kubernetes.io/component: meta
+        app.kubernetes.io/part-of: gmp
+        app.kubernetes.io/name: meta
+        app.kubernetes.io/version: meta
     spec:
       serviceAccountName: prometheus
       securityContext:

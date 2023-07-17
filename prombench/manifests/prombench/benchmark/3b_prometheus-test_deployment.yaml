@@ -18,6 +18,11 @@ spec:
       labels:
         app: prometheus
         prometheus: test-pr-{{ .PR_NUMBER }}
+        app.kubernetes.io/prometheus: test-pr-{{ .PR_NUMBER }}
+        app.kubernetes.io/component: test-pr-{{ .PR_NUMBER }}
+        app.kubernetes.io/part-of: gmp
+        app.kubernetes.io/name: test-pr-{{ .PR_NUMBER }}
+        app.kubernetes.io/version: test-pr-{{ .PR_NUMBER }}
     spec:
       serviceAccountName: prometheus
       affinity:
@@ -133,6 +138,11 @@ spec:
       labels:
         app: prometheus
         prometheus: test-{{ normalise .RELEASE }}
+        app.kubernetes.io/prometheus: test-{{ normalise .RELEASE }}
+        app.kubernetes.io/component: test-{{ normalise .RELEASE }}
+        app.kubernetes.io/part-of: gmp
+        app.kubernetes.io/name: test-{{ normalise .RELEASE }}
+        app.kubernetes.io/version: test-{{ normalise .RELEASE }}
     spec:
       serviceAccountName: prometheus
       affinity:

@@ -208,6 +208,8 @@ spec:
         - "--storage.tsdb.retention.size=500GB"  # 50% of the total storage available.
         - "--web.enable-lifecycle"
         - "--web.external-url=http://{{ .DOMAIN_NAME }}/prometheus-meta"
+        # JSON log format is needed for GKE to display log levels correctly.
+        - "--log.format=json"
         name: prometheus
         volumeMounts:
         - name: config-volume

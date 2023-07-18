@@ -70,7 +70,7 @@ spec:
           "--web.console.templates=/usr/bin/consoles",
           "--config.file=/etc/prometheus/prometheus.yml",
           # JSON log format is needed for GKE to display log levels correctly.
-          "--log.format=json"
+          "--log.format=json",
           "--log.level=debug"
         ]
         volumeMounts:
@@ -161,7 +161,7 @@ spec:
           "--web.console.templates=/etc/prometheus/consoles",
           "--config.file=/etc/prometheus/prometheus.yml",
         # JSON log format is needed for GKE to display log levels correctly.
-          "--log.format=json"
+          "--log.format=json",
           "--log.level=debug"
         ]
         volumeMounts:

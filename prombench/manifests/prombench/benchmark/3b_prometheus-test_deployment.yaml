@@ -64,6 +64,7 @@ spec:
           failureThreshold: 30
         command: ["/usr/bin/prometheus"]
         args: [
+          # default prombench args
           "--web.external-url=http://{{ .DOMAIN_NAME }}/{{ .PR_NUMBER }}/prometheus-pr",
           "--storage.tsdb.path=/prometheus",
           "--web.console.libraries=/usr/bin/console_libraries",
@@ -71,7 +72,16 @@ spec:
           "--config.file=/etc/prometheus/prometheus.yml",
           # JSON log format is needed for GKE to display log levels correctly.
           "--log.format=json",
-          "--log.level=debug"
+          "--log.level=debug",
+          # following args are copied from https://github.com/GoogleCloudPlatform/prometheus-engine/blob/main/cmd/operator/deploy/operator/10-collector.yaml#L93-L109 (default collector configuration). Flags that are not relevant are excluded.
+          "--enable-feature=exemplar-storage",
+          "--export.user-agent-mode=kubectl",
+          "--storage.tsdb.no-lockfile",
+          "--storage.tsdb.retention.time=30m",
+          "--storage.tsdb.wal-compression",
+          "--storage.tsdb.min-block-duration=10m",
+          "--storage.tsdb.max-block-duration=10m",
+          "--web.enable-lifecycle"
         ]
         volumeMounts:
         - name: config-volume
@@ -155,14 +165,24 @@ spec:
         imagePullPolicy: Always
         command: [ "/bin/prometheus" ]
         args: [
+          # default prombench args
           "--web.external-url=http://{{ .DOMAIN_NAME }}/{{ .PR_NUMBER }}/prometheus-release",
           "--storage.tsdb.path=/prometheus",
           "--web.console.libraries=/etc/prometheus/console_libraries",
           "--web.console.templates=/etc/prometheus/consoles",
           "--config.file=/etc/prometheus/prometheus.yml",
-        # JSON log format is needed for GKE to display log levels correctly.
+          # JSON log format is needed for GKE to display log levels correctly.
           "--log.format=json",
-          "--log.level=debug"
+          "--log.level=debug",
+          # following args are copied from https://github.com/GoogleCloudPlatform/prometheus-engine/blob/main/cmd/operator/deploy/operator/10-collector.yaml#L93-L109 (default collector configuration). Flags that are not relevant are excluded.
+          "--enable-feature=exemplar-storage",
+          "--export.user-agent-mode=kubectl",
+          "--storage.tsdb.no-lockfile",
+          "--storage.tsdb.retention.time=30m",
+          "--storage.tsdb.wal-compression",
+          "--storage.tsdb.min-block-duration=10m",
+          "--storage.tsdb.max-block-duration=10m",
+          "--web.enable-lifecycle"
         ]
         volumeMounts:
         - name: config-volume

@@ -6,6 +6,8 @@ PROMETHEUS_IMAGE_REPOSITORY ?= gke.gcr.io/prometheus-engine/prometheus
 
 PROMETHEUS_IMAGE_VERSION    ?= v2.35.0-gmp.7-gke.0
 
+NODE_RETENTION_TIME_PERIOD  ?= "3 days"
+
 .PHONY: deploy clean
 deploy: node_create resource_apply
 # GCP sometimes takes longer than 30 tries when trying to delete nodes
@@ -59,6 +61,7 @@ resource_apply:
 		-v GITHUB_ORG:${GITHUB_ORG} -v GITHUB_REPO:${GITHUB_REPO} \
 		-v PROMETHEUS_IMAGE_REPOSITORY:${PROMETHEUS_IMAGE_REPOSITORY} \
 		-v PROMETHEUS_IMAGE_VERSION:${PROMETHEUS_IMAGE_VERSION} \
+		-v NODE_RETENTION_TIME_PERIOD:${NODE_RETENTION_TIME_PERIOD} \
 		-f manifests/prombench/benchmark
 
 # Required because namespace and cluster-role are not part of the created nodes
@@ -67,7 +70,8 @@ resource_delete:
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v CLUSTER_NAME:${CLUSTER_NAME} -v PR_NUMBER:${PR_NUMBER} \
 		-f manifests/prombench/benchmark/1c_cluster-role-binding.yaml \
-		-f manifests/prombench/benchmark/1a_namespace.yaml
+		-f manifests/prombench/benchmark/1a_namespace.yaml \
+		-f manifests/prombench/benchmark/7_delete_old_nodes.yaml
 
 node_delete:
 	$(INFRA_CMD) ${PROVIDER} nodes delete \

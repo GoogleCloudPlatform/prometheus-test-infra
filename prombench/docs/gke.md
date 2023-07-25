@@ -71,6 +71,7 @@ make cluster_resource_apply
 ```
 export RELEASE=<master/main or any prometheus release(ex: v2.3.0) >
 export PR_NUMBER=<PR to benchmark against the selected $RELEASE>
+export NODE_RETENTION_TIME_PERIOD="3 days" # Can also be empty or "-1" (to disable node deletion for that PR run)
 ```
 
 - Create the nodepools for the k8s objects

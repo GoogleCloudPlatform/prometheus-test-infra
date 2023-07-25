@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nodes-cleanup-pr-{{ .PR_NUMBER }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nodes-cleanup-pr-{{ .PR_NUMBER }}
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - pods
+  # Needs the "container.clusterRoleBindings.delete" GCP (IAM) permission
+  verbs: ["get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nodes-cleanup-pr-{{ .PR_NUMBER }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nodes-cleanup-pr-{{ .PR_NUMBER }}
+subjects:
+- kind: ServiceAccount
+  name: nodes-cleanup-pr-{{ .PR_NUMBER }}
+  namespace: default
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: delete-old-nodes-pr-{{ .PR_NUMBER }}
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: nodes-cleanup-pr-{{ .PR_NUMBER }}
+          nodeSelector:
+            node-name: main-node
+          containers:
+          - name: delete-old-nodes-pr-{{ .PR_NUMBER }}
+            image: bitnami/kubectl:1.25-debian-11
+            command:
+              - bash
+            args:
+              - "-xc"
+              - |
+                PR_NUMBER={{ .PR_NUMBER }}
+                NODE_RETENTION_TIME_PERIOD="{{ .NODE_RETENTION_TIME_PERIOD }}"
+                if [ -z "${NODE_RETENTION_TIME_PERIOD}" ]
+                then
+                  NODE_RETENTION_TIME_PERIOD="3 days"
+                fi
+                
+                # Only delete those nodes that exceed the retention time period and can be deleted. If the 
+                # retention time period is set to "-1", it means that the user does not want to delete that node.
+                if [ "${NODE_RETENTION_TIME_PERIOD}" != "-1" ]
+                then
+
+                  OLD_NODES=$(kubectl get nodes -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | awk '$2 <= "'$(date -d "-${NODE_RETENTION_TIME_PERIOD}" -Ins --utc | sed 's/+0000/Z/')'" { print $1 }');
+
+                  for NODE in ${OLD_NODES}
+                  do
+                    if [[ "${NODE}" == *main-node* ]]
+                    then
+                      echo "The node ${NODE} is the main node. This will NOT be deleted."
+                    else
+                      echo "Deleting pod ${NODE}."
+                      kubectl delete node "${NODE}"
+                    fi
+                  done
+
+                fi
+          restartPolicy: OnFailure

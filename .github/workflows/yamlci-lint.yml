@@ -1,0 +1,16 @@
+name: Validate-YAML
+
+on:
+  pull_request:
+    branches:
+    - main
+    - master
+  # workflow_dispatch: {}
+
+jobs:
+  validate-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Validate YAML file
+        run: yamllint -f colored prombench/

@@ -75,7 +75,7 @@ spec:
         - "-f"
         - "/etc/scaler/webserver.yaml"
         - "-v"
-        - "PR_NUMBER:{{ .PR_NUMBER }}"        #Used to specify fake-webserver's namespace
+        - "PR_NUMBER:{{ .PR_NUMBER }}"        #Used to specify avalanche's namespace
         - "{{ .LOADGEN_SCALE_UP_REPLICAS }}"  #Scale Up replicas
         - "1"                                 #Scale Down replicas
         - "15m"                               #Sleep Interval between scaling
@@ -85,7 +85,7 @@ spec:
       volumes:
       - name: webserver-config-volume
         configMap:
-          name: fake-webserver-config-for-scaler
+          name: avalanche-config-for-scaler
       nodeSelector:
         node-name: nodes-{{ .PR_NUMBER }}
         isolation: none

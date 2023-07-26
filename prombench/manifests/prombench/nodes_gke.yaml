@@ -20,7 +20,7 @@ cluster:
       machinetype: n1-highcpu-16
       imagetype: COS_CONTAINERD
       disksizegb: 100
-      localssdcount: 0  #use standard HDD. SSD not needed for fake-webservers.
+      localssdcount: 0  #use standard HDD. SSD not needed for avalanche.
       labels:
         isolation: none
         node-name: nodes-{{ .PR_NUMBER }}

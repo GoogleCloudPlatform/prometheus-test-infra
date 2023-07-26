@@ -47,7 +47,7 @@ data:
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
 
-    - job_name: fake-webservers-1
+    - job_name: avalanche-1
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -56,11 +56,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-2
+    - job_name: avalanche-2
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -69,11 +69,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-3
+    - job_name: avalanche-3
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -82,11 +82,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-4
+    - job_name: avalanche-4
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -95,11 +95,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-5
+    - job_name: avalanche-5
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -108,11 +108,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-6
+    - job_name: avalanche-6
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -121,11 +121,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-7
+    - job_name: avalanche-7
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -134,11 +134,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-8
+    - job_name: avalanche-8
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -147,11 +147,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-9
+    - job_name: avalanche-9
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -160,11 +160,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-10
+    - job_name: avalanche-10
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -173,11 +173,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-11
+    - job_name: avalanche-11
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -186,11 +186,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-12
+    - job_name: avalanche-12
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -199,11 +199,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-13
+    - job_name: avalanche-13
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -212,11 +212,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-14
+    - job_name: avalanche-14
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -225,11 +225,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-15
+    - job_name: avalanche-15
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -238,11 +238,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-16
+    - job_name: avalanche-16
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -251,11 +251,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-17
+    - job_name: avalanche-17
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -264,11 +264,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-18
+    - job_name: avalanche-18
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -277,11 +277,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-19
+    - job_name: avalanche-19
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -290,11 +290,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-20
+    - job_name: avalanche-20
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -303,11 +303,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-21
+    - job_name: avalanche-21
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -316,11 +316,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-22
+    - job_name: avalanche-22
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -329,11 +329,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-23
+    - job_name: avalanche-23
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -342,11 +342,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-24
+    - job_name: avalanche-24
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -355,11 +355,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-25
+    - job_name: avalanche-25
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -368,11 +368,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-26
+    - job_name: avalanche-26
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -381,11 +381,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-27
+    - job_name: avalanche-27
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -394,11 +394,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-28
+    - job_name: avalanche-28
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -407,11 +407,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-29
+    - job_name: avalanche-29
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -420,11 +420,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-30
+    - job_name: avalanche-30
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -433,11 +433,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-31
+    - job_name: avalanche-31
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -446,11 +446,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-32
+    - job_name: avalanche-32
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -459,11 +459,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-33
+    - job_name: avalanche-33
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -472,11 +472,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-34
+    - job_name: avalanche-34
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -485,11 +485,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-35
+    - job_name: avalanche-35
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -498,11 +498,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-36
+    - job_name: avalanche-36
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -511,11 +511,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-37
+    - job_name: avalanche-37
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -524,11 +524,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-38
+    - job_name: avalanche-38
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -537,11 +537,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-39
+    - job_name: avalanche-39
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -550,11 +550,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-40
+    - job_name: avalanche-40
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -563,11 +563,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-41
+    - job_name: avalanche-41
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -576,11 +576,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-42
+    - job_name: avalanche-42
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -589,11 +589,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-43
+    - job_name: avalanche-43
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -602,11 +602,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-44
+    - job_name: avalanche-44
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -615,11 +615,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-45
+    - job_name: avalanche-45
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -628,11 +628,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-46
+    - job_name: avalanche-46
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -641,11 +641,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-47
+    - job_name: avalanche-47
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -654,11 +654,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-48
+    - job_name: avalanche-48
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -667,11 +667,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-49
+    - job_name: avalanche-49
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -680,11 +680,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName
-    - job_name: fake-webservers-50
+    - job_name: avalanche-50
       kubernetes_sd_configs:
       - role: endpoints
         namespaces:
@@ -693,7 +693,7 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
-        regex: fake-webserver
+        regex: avalanche
       - action: replace
         source_labels: [__meta_kubernetes_pod_node_name]
         target_label: nodeName

@@ -141,7 +141,11 @@ data:
       relabel_configs:
       - action: keep
         source_labels: [__meta_kubernetes_service_label_app]
+        {{ if eq .DISABLE_LOADGEN_QUERIER "true" }}
+        regex: prometheus|prometheus-meta|alertmanager|node-exporter
+        {{ else }}
         regex: prometheus|prometheus-meta|alertmanager|node-exporter|loadgen-querier
+        {{ end }}
       - action: replace
         source_labels: [__meta_kubernetes_service_label_app]
         target_label: job

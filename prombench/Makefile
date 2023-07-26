@@ -33,6 +33,7 @@ cluster_resource_apply:
 		-v GITHUB_ORG:${GITHUB_ORG} -v GITHUB_REPO:${GITHUB_REPO} \
 		-v PROMETHEUS_IMAGE_REPOSITORY:${PROMETHEUS_IMAGE_REPOSITORY} \
 		-v PROMETHEUS_IMAGE_VERSION:${PROMETHEUS_IMAGE_VERSION} \
+		-v DISABLE_LOADGEN_QUERIER:${DISABLE_LOADGEN_QUERIER} \
 		-f manifests/cluster-infra
 
 cluster_delete:
@@ -59,6 +60,7 @@ resource_apply:
 		-v GITHUB_ORG:${GITHUB_ORG} -v GITHUB_REPO:${GITHUB_REPO} \
 		-v PROMETHEUS_IMAGE_REPOSITORY:${PROMETHEUS_IMAGE_REPOSITORY} \
 		-v PROMETHEUS_IMAGE_VERSION:${PROMETHEUS_IMAGE_VERSION} \
+		-v DISABLE_LOADGEN_QUERIER:${DISABLE_LOADGEN_QUERIER} \
 		-f manifests/prombench/benchmark
 
 # Required because namespace and cluster-role are not part of the created nodes

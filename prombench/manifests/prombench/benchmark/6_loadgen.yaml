@@ -1,3 +1,4 @@
+{{ if eq .DISABLE_LOADGEN_QUERIER "false" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -48,6 +49,7 @@ data:
         - expr: histogram_quantile(0.99, sum by(path, le) (rate(codelab_api_request_duration_seconds_bucket{method="POST"}[5m])))
         - expr: histogram_quantile(0.99, sum by(path, method, le) (rate(codelab_api_request_duration_seconds_bucket{method="POST"}[5m])))
         - expr: histogram_quantile(0.99, sum by(instance, le) (rate(codelab_api_request_duration_seconds_bucket{method="POST"}[5m])))
+{{ end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -90,6 +92,7 @@ spec:
         node-name: nodes-{{ .PR_NUMBER }}
         isolation: none
 ---
+{{ if eq .DISABLE_LOADGEN_QUERIER "false" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -146,3 +149,4 @@ spec:
     targetPort: loadgen-port
   selector:
     app: loadgen-querier
+{{ end }}

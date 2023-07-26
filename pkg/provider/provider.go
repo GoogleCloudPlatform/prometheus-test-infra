@@ -51,6 +51,7 @@ func NewDeploymentResource() *DeploymentResource {
 			"LOADGEN_SCALE_UP_REPLICAS":   "10",
 			"SEPARATOR":                   ",",
 			"SERVICEACCOUNT_CLIENT_EMAIL": "example@example.com",
+			"DISABLE_LOADGEN_QUERIER":     "true",
 		},
 	}
 }

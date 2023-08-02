@@ -13,7 +13,7 @@ deploy: node_create resource_apply
 clean: resource_delete node_delete
 
 cluster_create:
-	${INFRA_CMD} ${PROVIDER} cluster create \
+	${INFRA_CMD} ${PROVIDER} cluster create -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} -v SEPARATOR:${SEPARATOR} \
@@ -21,7 +21,7 @@ cluster_create:
 		-f manifests/cluster_${PROVIDER}.yaml
 
 cluster_resource_apply:
-	${INFRA_CMD} ${PROVIDER} resource apply \
+	${INFRA_CMD} ${PROVIDER} resource apply -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} -v SEPARATOR:${SEPARATOR} \
@@ -36,7 +36,7 @@ cluster_resource_apply:
 		-f manifests/cluster-infra
 
 cluster_delete:
-	${INFRA_CMD} ${PROVIDER} cluster delete \
+	${INFRA_CMD} ${PROVIDER} cluster delete -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} -v SEPARATOR:${SEPARATOR} \
@@ -44,7 +44,7 @@ cluster_delete:
 		-f manifests/cluster_${PROVIDER}.yaml
 
 node_create:
-	${INFRA_CMD} ${PROVIDER} nodes create \
+	${INFRA_CMD} ${PROVIDER} nodes create -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} \
@@ -52,7 +52,7 @@ node_create:
 		-f manifests/prombench/nodes_${PROVIDER}.yaml
 
 resource_apply:
-	$(INFRA_CMD) ${PROVIDER} resource apply \
+	$(INFRA_CMD) ${PROVIDER} resource apply -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v CLUSTER_NAME:${CLUSTER_NAME} \
 		-v PR_NUMBER:${PR_NUMBER} -v RELEASE:${RELEASE} -v DOMAIN_NAME:${DOMAIN_NAME} \
@@ -63,14 +63,14 @@ resource_apply:
 
 # Required because namespace and cluster-role are not part of the created nodes
 resource_delete:
-	$(INFRA_CMD) ${PROVIDER} resource delete \
+	$(INFRA_CMD) ${PROVIDER} resource delete -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v CLUSTER_NAME:${CLUSTER_NAME} -v PR_NUMBER:${PR_NUMBER} \
 		-f manifests/prombench/benchmark/1c_cluster-role-binding.yaml \
 		-f manifests/prombench/benchmark/1a_namespace.yaml
 
 node_delete:
-	$(INFRA_CMD) ${PROVIDER} nodes delete \
+	$(INFRA_CMD) ${PROVIDER} nodes delete -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} \
@@ -78,7 +78,7 @@ node_delete:
 		-f manifests/prombench/nodes_${PROVIDER}.yaml
 
 all_nodes_running:
-	$(INFRA_CMD) ${PROVIDER} nodes check-running \
+	$(INFRA_CMD) ${PROVIDER} nodes check-running -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} -v SEPARATOR:${SEPARATOR} \
@@ -86,7 +86,7 @@ all_nodes_running:
 		-f manifests/prombench/nodes_${PROVIDER}.yaml	
 
 all_nodes_deleted:
-	$(INFRA_CMD) ${PROVIDER} nodes check-deleted \
+	$(INFRA_CMD) ${PROVIDER} nodes check-deleted -a ${AUTH_FILE} \
 		-v ZONE:${ZONE} -v GKE_PROJECT_ID:${GKE_PROJECT_ID} \
 		-v EKS_WORKER_ROLE_ARN:${EKS_WORKER_ROLE_ARN} -v EKS_CLUSTER_ROLE_ARN:${EKS_CLUSTER_ROLE_ARN} \
 		-v EKS_SUBNET_IDS:${EKS_SUBNET_IDS} -v SEPARATOR:${SEPARATOR} \

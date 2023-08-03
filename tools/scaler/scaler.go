@@ -31,10 +31,12 @@ import (
 )
 
 type scale struct {
-	k8sClient *k8s.K8s
-	min       int32
-	max       int32
-	interval  time.Duration
+	k8sClient     *k8s.K8s
+	min           int32
+	max           int32
+	interval      time.Duration
+	patternName   string
+	scalingFactor int32 // for step-like scaling (~ step height)
 }
 
 func newScaler() *scale {
@@ -68,26 +70,74 @@ func (s *scale) updateReplicas(replicas *int32) []k8s.Resource {
 }
 
 func (s *scale) scale(*kingpin.ParseContext) error {
-	log.Printf("Starting Prombench-Scaler:\n\t max: %d\n\t min: %d\n\t interval: %s", s.max, s.min, s.interval)
 
-	maxResourceObjects := s.updateReplicas(&s.max)
-	minResourceObjects := s.updateReplicas(&s.min)
+	if s.patternName == "burst" {
+		log.Printf("Auto-scale pattern: %s", s.patternName)
+		log.Printf("Starting Prombench-Scaler:\n\t max: %d\n\t min: %d\n\t interval: %s", s.max, s.min, s.interval)
 
-	for {
-		log.Printf("Scaling Deployment to %d", s.max)
-		if err := s.k8sClient.ResourceApply(maxResourceObjects); err != nil {
-			fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error scaling deployment"))
+		maxResourceObjects := s.updateReplicas(&s.max)
+		minResourceObjects := s.updateReplicas(&s.min)
+
+		for {
+			log.Printf("Scaling Deployment to %d", s.max)
+			if err := s.k8sClient.ResourceApply(maxResourceObjects); err != nil {
+				fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error scaling deployment"))
+			}
+
+			time.Sleep(s.interval)
+
+			log.Printf("Scaling Deployment to %d", s.min)
+			if err := s.k8sClient.ResourceApply(minResourceObjects); err != nil {
+				fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error scaling deployment"))
+			}
+
+			time.Sleep(s.interval)
 		}
 
-		time.Sleep(s.interval)
+	} else if s.patternName == "step" {
+		log.Printf("Auto-scale pattern: %s", s.patternName)
 
-		log.Printf("Scaling Deployment to %d", s.min)
-		if err := s.k8sClient.ResourceApply(minResourceObjects); err != nil {
-			fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error scaling deployment"))
+		updateScalingFactor := false
+
+		if s.scalingFactor >= s.max {
+			log.Printf("scalingFactor (%d) >= max (%d)", s.scalingFactor, s.max)
+			updateScalingFactor = true
+		}
+		if s.scalingFactor == 0 {
+			log.Print("scalingFactor is set to 0.")
+			updateScalingFactor = true
 		}
 
-		time.Sleep(s.interval)
+		if updateScalingFactor == true {
+			s.scalingFactor = int32(s.max / 10) // 10 steps
+			log.Printf("Updating the scaling factor to: %d", s.scalingFactor)
+		}
+
+		log.Printf("Starting Prombench-Scaler:\n\t max: %d\n\t min: %d\n\t interval: %s\n\t scalingFactor: %d", s.max, s.min, s.interval, s.scalingFactor)
+
+		numberOfResources := s.min
+		for {
+			log.Printf("Scaling Deployment to %d", numberOfResources)
+
+			resourceObjects := s.updateReplicas(&numberOfResources)
+			if err := s.k8sClient.ResourceApply(resourceObjects); err != nil {
+				fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error scaling deployment"))
+			}
+
+			time.Sleep(s.interval)
+
+			numberOfResources += s.scalingFactor
+			if numberOfResources > s.max {
+				numberOfResources = s.max
+			}
+		}
+
+	} else {
+		log.Printf("Invalid pattern: %s", s.patternName)
+		os.Exit(2)
 	}
+
+	return nil
 }
 
 func main() {
@@ -116,6 +166,12 @@ func main() {
 	k8sApp.Arg("interval", "Time to wait before changing the number of replicas.").
 		Required().
 		DurationVar(&s.interval)
+	k8sApp.Arg("patternName", "Auto-scaling pattern. Defines the scaling function for K8s resources. Available values: burst, step.").
+		Required().
+		Default("burst").
+		StringVar(&s.patternName)
+	k8sApp.Arg("scalingFactor", "Indicates the 'step height' during step-like autoscaling.").
+		Int32Var(&s.scalingFactor)
 
 	if _, err := app.Parse(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, errors.Wrapf(err, "Error parsing commandline arguments"))

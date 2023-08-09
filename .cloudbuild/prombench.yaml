@@ -1,0 +1,364 @@
+steps:
+  - id: "Writing environment variables to file"
+    name: bash
+    env:
+    - '_GIT_REPO=$_GIT_REPO' # GoogleCloudPlatform/prometheus
+    - '_PR_NUMBER=$_PR_NUMBER'
+    script: |
+      # Some environment variables may change in the steps based on certain conditions. They are written
+      # to file when changed and the new values are read from the file. Cloudbuild suggests this approach
+      # to pass data between steps: https://cloud.google.com/build/docs/configuring-builds/pass-data-between-steps
+      # We write the default values for such environment variables to file so that we need not
+      # check if the file exists on disk or not in the following steps. When need be, the default values for
+      # the respective environment variables will get overwritten in the corresponding files.
+      echo "$${CANCEL_BENCHMARK}" > /workspace/CANCEL_BENCHMARK
+      echo "$${CREATE_CLUSTER}" > /workspace/CREATE_CLUSTER
+      echo "$${EXIT_EARLY}" > /workspace/EXIT_EARLY
+
+
+      # The following environment variables are written to a file to be passed as an input to the Prombench containers.
+      GITHUB_ORG=$(echo "${_GIT_REPO}" | cut -d'/' -f1) # GoogleCloudPlatform
+      GITHUB_REPO=$(echo "${_GIT_REPO}" | cut -d'/' -f2) # prometheus
+
+      echo "AUTH_FILE=/home/adc.json" >> /workspace/PROMBENCH_ENV_FILE
+      echo "CLUSTER_NAME=${CLUSTER_NAME}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "DOMAIN_NAME=${DOMAIN_NAME}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "GITHUB_ORG=${GITHUB_ORG}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "GITHUB_REPO=${GITHUB_REPO}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "GKE_PROJECT_ID=${GKE_PROJECT_ID}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "LAST_COMMIT_SHA=${LAST_COMMIT_SHA}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "OAUTH_TOKEN=${OAUTH_TOKEN}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "PR_NUMBER=${_PR_NUMBER}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "PROMETHEUS_IMAGE_REPOSITORY=${PROMETHEUS_IMAGE_REPOSITORY}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "PROVIDER=${PROVIDER}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "SERVICEACCOUNT_CLIENT_EMAIL=${SERVICEACCOUNT_CLIENT_EMAIL}"  >> /workspace/PROMBENCH_ENV_FILE
+      echo "WH_SECRET=${WH_SECRET}" >> /workspace/PROMBENCH_ENV_FILE
+      echo "ZONE=${ZONE}" >> /workspace/PROMBENCH_ENV_FILE
+
+  - id: "Verifying GitHub comment and user permissions"
+    name: bash
+    env:
+    - '_COMMENTER=$_COMMENTER'
+    - '_COMMENTER_ROLE=$_COMMENTER_ROLE'
+    - '_GIT_REPO=$_GIT_REPO'
+    - '_PR_COMMENT_ACTION=$_PR_COMMENT_ACTION'
+    - '_PR_COMMENT_TEXT=$_PR_COMMENT_TEXT'
+    - '_PR_NUMBER=$_PR_NUMBER'
+    secretEnv: ['GH_PAT']
+    # allowExitCodes is used to not mark the step as failed in case of early exit (when prombench conditions are not met).
+    # This allows to exit gracefully from the current step.
+    allowExitCodes: [1]
+    script: |
+      #!/usr/bin/env bash
+
+      # Benchmark should trigger only when a new comment is created. Available actions: created, deleted and edited -- https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads
+      # Ignore comments from gmp-bot (as it will lead to recursive webhook triggers when gmp-bot comments again on the PR)
+      # The PR comment's text should start with '/prombench'
+      if ! ([ "${_PR_COMMENT_ACTION}" == "created" ] && [ "${_COMMENTER}" != "gmp-bot" ] && [[ "${_PR_COMMENT_TEXT}" == \/prombench* ]])
+      then
+        echo "The following requirements must be met to run prombench:\n1. The PR comment type must be created. Given PR comment type: ${_PR_COMMENT_ACTION}.\n2. The commenter must not be the gmp-bot. Commenter: ${_COMMENTER}.\n3. The PR comment must start with '/prombench'. Given PR comment: ${_PR_COMMENT_TEXT}.\n\nSince some or all of the above conditions do not meet, the benchmark would not be triggered."
+        
+        echo "true" > /workspace/EXIT_EARLY
+        exit 1
+      fi
+
+      # User Verification (https://docs.github.com/en/graphql/reference/enums#commentauthorassociation)
+      if ! ([ "${_COMMENTER_ROLE}" == "OWNER" ] || [ "${_COMMENTER_ROLE}" == "MEMBER" ] || [ "${_COMMENTER_ROLE}" == "COLLABORATOR" ])
+      then
+
+        GITHUB_ORG=$(echo "${_GIT_REPO}" | cut -d'/' -f1)
+        GITHUB_REPO=$(echo "${_GIT_REPO}" | cut -d'/' -f2)
+
+        COMMENT_MSG="${_COMMENTER} does not have admin or write privileges. Therefore cannot execute the benchmark command."
+        GITHUB_URL="https://api.github.com/repos/$${GITHUB_ORG}/$${GITHUB_REPO}/issues/${_PR_NUMBER}/comments"
+        echo "$${COMMENT_MSG}"
+        
+        # Commenting on the GitHub PR
+        curl --silent -L -X POST \
+          -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $${GH_PAT}" -H "X-GitHub-Api-Version: 2022-11-28" \
+          "$${GITHUB_URL}" \
+          -d '{"body": "'"$${COMMENT_MSG}"'"}'
+        
+        echo "true" > /workspace/EXIT_EARLY
+        exit 1
+      fi
+
+  - id: "Setting environment variables"
+    name: gcr.io/cloud-builders/gcloud
+    env:
+    - '_PR_COMMENT_TEXT=$_PR_COMMENT_TEXT'
+    allowExitCodes: [1]
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+
+        COLLECTOR_TAG_OR_CANCEL=$(echo "${_PR_COMMENT_TEXT}" | head -n 1 | awk '{ print $2 }')
+        if [ "$${COLLECTOR_TAG_OR_CANCEL}" == "cancel" ]
+        then          
+          echo "true" > /workspace/CANCEL_BENCHMARK
+          exit 1
+        fi
+        
+        echo "GMP Collector Tag: $${COLLECTOR_TAG_OR_CANCEL}"
+
+        GCLOUD_TAG="[]"
+        # Checking if the tag is valid.
+        if [[ "$${COLLECTOR_TAG_OR_CANCEL}" != '' ]]
+        then
+          GCLOUD_TAG=$(gcloud container images list-tags --filter="tags:$${COLLECTOR_TAG_OR_CANCEL}" --format=json $${PROMETHEUS_IMAGE_REPOSITORY})
+        fi
+          
+        if ([[ "$${GCLOUD_TAG}" == "[]" ]] || [[ "$${COLLECTOR_TAG_OR_CANCEL}" == '' ]])
+        then
+          echo "Either the given tag is not valid or it is empty. The latest collector tag would be used."
+          DEFAULT_COLLECTOR_TAG=$(gcloud container images list-tags "$${PROMETHEUS_IMAGE_REPOSITORY}" --sort-by=UPDATE_TIME,TAGS | tail -1 | awk '{ print $2 }')
+          PROMETHEUS_IMAGE_VERSION="$${DEFAULT_COLLECTOR_TAG}"
+        else
+          PROMETHEUS_IMAGE_VERSION="$${COLLECTOR_TAG_OR_CANCEL}"
+        fi
+
+        echo "$${PROMETHEUS_IMAGE_VERSION}" > /workspace/PROMETHEUS_IMAGE_VERSION
+        echo "PROMETHEUS_IMAGE_VERSION=$${PROMETHEUS_IMAGE_VERSION}" >> /workspace/PROMBENCH_ENV_FILE
+        echo "RELEASE=$${PROMETHEUS_IMAGE_VERSION}" >> /workspace/PROMBENCH_ENV_FILE
+        echo "The release/base GMP Collector's tag is set to: $${PROMETHEUS_IMAGE_VERSION}."
+
+  - id: "Checking cluster's existance"
+    name: gcr.io/cloud-builders/gcloud
+    allowExitCodes: [1]
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+
+        if $(gcloud container clusters describe "$${CLUSTER_NAME}" --project="$${GKE_PROJECT_ID}" --location="$${ZONE}" >/dev/null 2>&1)
+        then
+          echo "false" > /workspace/CREATE_CLUSTER
+          echo "The cluster (name: $${CLUSTER_NAME}) already exists. Therefore, skipping cluster creation."
+        else
+          echo "true" > /workspace/CREATE_CLUSTER
+          echo "The cluster (name: $${CLUSTER_NAME}) does not exist, the cluster will get created before creating the nodes and triggering the benchmark process."
+        fi
+
+  - id: "Setting gcloud credentials for triggering the benchmark"
+    name: gcr.io/cloud-builders/gcloud
+    secretEnv: ['ADC']
+    allowExitCodes: [1]
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+
+        echo "$${ADC}" > /workspace/adc.json
+
+  - id: "Cancelling the benchmark"
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    secretEnv: ['GH_PAT']
+    allowExitCodes: [1]
+    env:
+    - '_GIT_REPO=$_GIT_REPO' # GoogleCloudPlatform/prometheus
+    - '_PR_NUMBER=$_PR_NUMBER'
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+        
+        CANCEL_BENCHMARK=$(cat /workspace/CANCEL_BENCHMARK)
+        CREATE_CLUSTER=$(cat /workspace/CREATE_CLUSTER)
+
+        if [[ "$${CANCEL_BENCHMARK}" == "true" ]]
+        then
+          echo "true" > /workspace/EXIT_EARLY
+          
+          if [[ "$${CREATE_CLUSTER}" == "true" ]]
+          then
+            COMMENT_MSG="There are no benchmark runs executing as the cluster ($${CLUSTER_NAME}) does not exist."
+            echo "$${COMMENT_MSG}"
+          else
+            COMMENT_MSG="Cancelling the benchmark run for this PR: #${_PR_NUMBER}."
+            echo "$${COMMENT_MSG}"
+
+            docker run --volume /workspace/adc.json:/home/adc.json \
+              --env-file /workspace/PROMBENCH_ENV_FILE \
+              "$${PROMBENCH_IMAGE}" make clean;
+          fi
+
+          GITHUB_ORG=$$(echo "${_GIT_REPO}" | cut -d'/' -f1) # GoogleCloudPlatform
+          GITHUB_REPO=$$(echo "${_GIT_REPO}" | cut -d'/' -f2) # prometheus
+
+          GITHUB_URL="https://api.github.com/repos/$${GITHUB_ORG}/$${GITHUB_REPO}/issues/${_PR_NUMBER}/comments"
+          # Commenting on the GitHub PR
+          curl --silent -L -X POST \
+            -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $${GH_PAT}" -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$${GITHUB_URL}" \
+            -d '{"body": "'"$${COMMENT_MSG}"'"}'
+        fi
+  
+  
+  - id: "Posting the dashboard link to the GitHub PR"
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    secretEnv: ['GH_PAT']
+    allowExitCodes: [1]
+    env:
+    - '_GIT_REPO=$_GIT_REPO' # GoogleCloudPlatform/prometheus
+    - '_PR_NUMBER=$_PR_NUMBER'
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+
+        PROMETHEUS_IMAGE_VERSION=$(cat /workspace/PROMETHEUS_IMAGE_VERSION)
+
+        GITHUB_ORG=$$(echo "${_GIT_REPO}" | cut -d'/' -f1) # GoogleCloudPlatform
+        GITHUB_REPO=$$(echo "${_GIT_REPO}" | cut -d'/' -f2) # prometheus
+
+        CURRENT_DATE_TIME=$(date '+%Y-%m-%dT%H:%M:%S.%3NZ')
+        MONITORING_DASHBOARD_URL="https://console.cloud.google.com/monitoring/dashboards/builder/$${DASHBOARD_ID};startTime=$${CURRENT_DATE_TIME}?f.mlabel.prometheus.prometheus=&f.rlabel.namespace_name.namespace_name=prombench-${_PR_NUMBER}&f.rlabel.namespace.namespace=prombench-${_PR_NUMBER}&f.rlabel.cluster_name.cluster_name=$${CLUSTER_NAME}&f.rlabel.cluster.cluster=$${CLUSTER_NAME}&f.umlabel.goog-k8s-cluster-name.googk8sclustername=$${CLUSTER_NAME}"
+
+
+        COMMENT_MSG="This benchmark run compares this PR (https://github.com/$${GITHUB_ORG}/$${GITHUB_REPO}/pull/${_PR_NUMBER}) with version \`$${PROMETHEUS_IMAGE_VERSION}\` of the [GMP Collector](https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-managed).\n\nAfter a successful deployment, the benchmarking results can be viewed on the [Cloud Monitoring Dashboard]($${MONITORING_DASHBOARD_URL}).\n\nTo cancel or stop the benchmark run, comment \`/prombench cancel\` on this PR."
+        
+        echo "$${COMMENT_MSG}"
+        
+        GITHUB_URL="https://api.github.com/repos/$${GITHUB_ORG}/$${GITHUB_REPO}/issues/${_PR_NUMBER}/comments"        
+        
+        # Commenting on the GitHub PR
+        curl --silent -L -X POST \
+          -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $${GH_PAT}" -H "X-GitHub-Api-Version: 2022-11-28" \
+          "$${GITHUB_URL}" \
+          -d '{"body": "'"$${COMMENT_MSG}"'"}'
+  
+  - id: "Creating the cluster and applying cluster-wide resources"
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    allowExitCodes: [1]
+    env:
+    - '_GIT_REPO=$_GIT_REPO' # GoogleCloudPlatform/prometheus
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+        
+        CREATE_CLUSTER=$(cat /workspace/CREATE_CLUSTER) 
+
+        GITHUB_ORG=$$(echo "${_GIT_REPO}" | cut -d'/' -f1) # GoogleCloudPlatform
+        GITHUB_REPO=$$(echo "${_GIT_REPO}" | cut -d'/' -f2) # prometheus
+        
+        if [[ "$${CREATE_CLUSTER}" == "true" ]]
+        then
+          echo "Creating cluster: $${CLUSTER_NAME}."
+          docker run --volume /workspace/adc.json:/home/adc.json \
+            --env-file /workspace/PROMBENCH_ENV_FILE \
+            "$${PROMBENCH_IMAGE}" make cluster_create;
+
+          
+          echo "Applying the cluster resources (on the main node)."
+          docker run --volume /workspace/adc.json:/home/adc.json \
+            --env-file /workspace/PROMBENCH_ENV_FILE \
+            "$${PROMBENCH_IMAGE}" make cluster_resource_apply;
+
+        else
+          echo "Cluster (name: $${CLUSTER_NAME}) already exists."
+        fi
+
+  - id: "Creating prometheus nodepools and applying node resources"
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    allowExitCodes: [1]
+    env:
+    - '_GIT_REPO=$_GIT_REPO' # GoogleCloudPlatform/prometheus
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        EXIT_EARLY=$(cat /workspace/EXIT_EARLY)
+        if [ "$${EXIT_EARLY}" == "true" ]
+        then
+          exit 1
+        fi
+
+        GITHUB_ORG=$$(echo "${_GIT_REPO}" | cut -d'/' -f1) # GoogleCloudPlatform
+        GITHUB_REPO=$$(echo "${_GIT_REPO}" | cut -d'/' -f2) # prometheus
+
+        echo "Creating nodepools for prometheus nodes."
+        docker run --volume /workspace/adc.json:/home/adc.json \
+          --env-file /workspace/PROMBENCH_ENV_FILE \
+          "$${PROMBENCH_IMAGE}" "make clean; until make all_nodes_deleted; do echo "Waiting for nodepools to be deleted"; sleep 10; done; make node_create;"
+
+        echo "Applying resources on prometheus nodes."
+          docker run --volume /workspace/adc.json:/home/adc.json \
+          --env-file /workspace/PROMBENCH_ENV_FILE \
+          "$${PROMBENCH_IMAGE}" make resource_apply;
+
+
+# https://cloud.google.com/build/docs/build-config-file-schema#options
+options:
+  env:
+  - 'CANCEL_BENCHMARK=false'
+  - 'CLUSTER_NAME=prombench'
+  - 'CREATE_CLUSTER=true'
+  - 'DASHBOARD_ID=$_DASHBOARD_ID'
+  - 'DOMAIN_NAME='
+  # EXIT_EARLY is used to check if the step(s) must be skipped (maybe because of any failure in condition-checks). This variable is checked
+  # in the beginning of every step to see if that step must be skipped or not.
+  - 'EXIT_EARLY=false'
+  - 'GKE_PROJECT_ID=$PROJECT_ID' # https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values#using_default_substitutions
+  - 'GRAFANA_ADMIN_PASSWORD=admin'
+  - 'LAST_COMMIT_SHA='
+  - 'OAUTH_TOKEN='
+  - 'PROMBENCH_IMAGE=$_PROMBENCH_IMAGE'
+  - 'PROMETHEUS_IMAGE_REPOSITORY=gke.gcr.io/prometheus-engine/prometheus'
+  - 'PROVIDER=gke'
+  - 'SERVICEACCOUNT_CLIENT_EMAIL=$_SERVICEACCOUNT_CLIENT_EMAIL'
+  - 'WH_SECRET='
+  - 'ZONE=us-east4-a'
+  
+  # https://cloud.google.com/build/docs/build-config-file-schema
+  # dynamicSubstitutions enables bash parameter expansion in substitutions (Option to specify whether or not to apply bash style string operations to the substitutions)
+  dynamicSubstitutions: true
+
+# https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+substitutions:
+  _COMMENTER: $(body.comment.user.login)
+  _COMMENTER_ROLE: $(body.comment.author_association) # OWNER / MEMBER / etc. (https://docs.github.com/en/graphql/reference/enums#commentauthorassociation)
+  _GIT_REPO: $(body.repository.full_name) # GoogleCloudPlatform/prometheus
+  _PR_COMMENT_ACTION: $(body.action)
+  _PR_COMMENT_TEXT: $(body.comment.body)
+  _PR_NUMBER: $(body.issue.number)
+
+# https://cloud.google.com/build/docs/build-config-file-schema#availablesecrets
+availableSecrets:
+  secretManager:
+  - versionName: projects/${PROJECT_NUMBER}/secrets/prombench_service_account_adc_json/versions/1
+    env: 'ADC'
+  - versionName: projects/${PROJECT_NUMBER}/secrets/bot-github-personal-access-token/versions/1
+    env: 'GH_PAT'

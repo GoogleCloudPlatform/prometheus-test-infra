@@ -43,7 +43,7 @@ export GRAFANA_ADMIN_PASSWORD=password
 export DOMAIN_NAME=prombench.prometheus.io # Can be set to any other custom domain or an empty string when not used with the Github integration.
 export OAUTH_TOKEN=<generated token from github or set to an empty string " ">
 export WH_SECRET=<github webhook secret>
-export GITHUB_ORG=prometheus
+export GITHUB_ORG=GoogleCloudPlatform
 export GITHUB_REPO=prometheus
 ```
 

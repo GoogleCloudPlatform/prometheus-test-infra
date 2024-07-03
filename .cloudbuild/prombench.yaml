@@ -242,9 +242,7 @@ steps:
         MONITORING_DASHBOARD_URL="https://console.cloud.google.com/monitoring/dashboards/builder/$${DASHBOARD_ID};startTime=$${CURRENT_DATE_TIME}?f.mlabel.prometheus.prometheus=&f.rlabel.namespace_name.namespace_name=prombench-${_PR_NUMBER}&f.rlabel.namespace.namespace=prombench-${_PR_NUMBER}&f.rlabel.cluster_name.cluster_name=$${CLUSTER_NAME}&f.rlabel.cluster.cluster=$${CLUSTER_NAME}&f.umlabel.goog-k8s-cluster-name.googk8sclustername=$${CLUSTER_NAME}"
 
 
-        COMMENT_MSG="This benchmark run compares this PR (https://github.com/$${GITHUB_ORG}/$${GITHUB_REPO}/pull/${_PR_NUMBER}) with version \`$${PROMETHEUS_IMAGE_VERSION}\` of the [GMP Collector](https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-managed).\n\nAfter a successful deployment, the benchmarking results can be viewed on the [Cloud Monitoring Dashboard]($${MONITORING_DASHBOARD_URL}).\n\nTo cancel or stop the benchmark run, comment \`/prombench cancel\` on this PR. To view the results of the profiling process you can run the following commands.\n\n 
-
-\```gcloud container clusters get-credentials prombench --zone us-east4-a --project gpe-test-1\n kubectl use-context gke_gpe-test-1_us-east4-a_prombench\n kubectl port-forward services/parca 31802:80\```"
+        COMMENT_MSG="This benchmark run compares this PR (https://github.com/$${GITHUB_ORG}/$${GITHUB_REPO}/pull/${_PR_NUMBER}) with version \`$${PROMETHEUS_IMAGE_VERSION}\` of the [GMP Collector](https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-managed).\n\nAfter a successful deployment, the benchmarking results can be viewed on the [Cloud Monitoring Dashboard]($${MONITORING_DASHBOARD_URL}).\n\nTo cancel or stop the benchmark run, comment \`/prombench cancel\` on this PR. To view the results of the profiling process you can run the following commands.\n\n \```gcloud container clusters get-credentials prombench --zone us-east4-a --project gpe-test-1\n kubectl use-context gke_gpe-test-1_us-east4-a_prombench\n kubectl port-forward services/parca 31802:80\```"
         
         echo "$${COMMENT_MSG}"
         

@@ -16,9 +16,6 @@ prefixes:
   - prefix: /prombench
     help_template: |
       Get prombench syntax help here.
-  - prefix: /funcbench
-    help_template: |
-      Get funcbench syntax help [here](https://canbealink).
 eventmaps:
   - event_type: prombench_stop
     regex_string: (?mi)^/prombench\s+cancel\s*$

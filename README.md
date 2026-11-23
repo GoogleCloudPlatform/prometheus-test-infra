@@ -1,3 +1,10 @@
+# Deprecated and unmaintained
+
+> **Warning**
+> This repository is no longer maintained and has been archived. For upstream Prometheus benchmarking infrastructure, see [prometheus/test-infra](https://github.com/prometheus/test-infra).
+
+---
+
 ## This repository contains tools and configuration files for the testing and benchmarking used in the Prometheus project.
 
 ### [`/prombench`](/prombench)

@@ -1,6 +1,6 @@
 # Deprecated and unmaintained
 
-> **Warning**
+> [!WARNING]
 > This repository is no longer maintained and has been archived. For upstream Prometheus benchmarking infrastructure, see [prometheus/test-infra](https://github.com/prometheus/test-infra).
 
 ---
